@@ -1,0 +1,54 @@
+---
+title: "Check the P-values"
+author: "Britta Velten"
+date:  "`r format(Sys.Date(),'%e %B, %Y')`"
+output: BiocStyle::html_document
+params:
+  date: "2023-10-18"
+---
+
+The process was fairly complicated and there were a lot of bugs on first glance, so check that the results are in fact what you think they should be.
+
+# Preparations
+```{r prep, echo = F, warning=FALSE, message=FALSE}
+# to render pngs in html
+library(Cairo)
+knitr::opts_chunk$set(fig.path = plotsdir, dev=c("CairoPNG", "pdf"))
+```
+
+# Heritable Knockdowns
+
+```{r, fig.width = 5, fig.height=6}
+
+frac_heritable_pairs <- as.data.frame(table(heritable_pairs$target))
+colnames(frac_heritable_pairs) <- c("target", "n_heritable_downstream")
+
+total_downstream_tested <- as.data.frame(table(all_pairs_tested$target))
+colnames(total_downstream_tested) <- c("target", "n_downstream_tested")
+frac_heritable_pairs <- left_join(frac_heritable_pairs, total_downstream_tested) %>%
+  mutate(frac_downstream = n_heritable_downstream/n_downstream_tested)
+
+df4plot <- frac_heritable_pairs %>%
+  slice_max(n_heritable_downstream, n = 20)
+ggplot(df4plot, aes(x = n_heritable_downstream, y = reorder(target, n_heritable_downstream))) + 
+  geom_bar(stat = 'identity') + theme_bw()
+
+df4plot <- frac_heritable_pairs %>%
+  slice_max(frac_downstream, n = 20)
+ggplot(df4plot, aes(x = frac_downstream, y = reorder(target, frac_downstream))) + 
+  geom_bar(stat = 'identity') + theme_bw()
+
+```
+
+
+# Predicting Heritability??
+
+
+
+# SessionInfo
+```{r}
+sessionInfo()
+```
+
+
+
